@@ -134,29 +134,134 @@ CREATE TABLE votes (
 
 Las tablas se crean automáticamente al arrancar la aplicación.
 
-## Autenticación
+## Environment Variables
 
-Todos los endpoints de `voters`, `candidates` y `votes` requieren un token JWT.
+Crea un archivo `.env` en la carpeta raíz y agrega la siguiente configuración:
 
-Usuario fijo de prueba:
-- **username:** `admin`
-- **password:** `admin123`
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=voting_db
+DB_USER=postgres
+DB_PASSWORD=your_password
 
-### Obtener un token (curl)
+SECRET_KEY=my_super_secret_key_123
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+```
+
+
+Sustituye `tu_contraseña` por tu contraseña de PostgreSQL.
+
+Importante: el archivo `.env` no debe subirse a GitHub.
+
+---
+
+## Run the Project
+
+Run the API with:
 
 ```bash
-curl -X POST "http://localhost:8000/auth/login" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=admin&password=admin123"
+uvicorn app.main:app --reload
 ```
 
-Respuesta:
-```json
-{
-  "access_token": "eyJhbGciOi...",
-  "token_type": "bearer"
-}
+## Authentication
+
+
+La API utiliza autenticación JWT para proteger los puntos finales principales.
+
+### Login Credentials
+
+```text
+username: admin
+password: admin123
 ```
+
+### Login Endpoint
+
+```http
+POST /auth/login
+```
+
+En Swagger, haga clic en el botón **Autorizar** e ingrese:
+
+```text
+username: admin
+password: admin123
+```
+
+
+Tras la autorización, se podrán utilizar los puntos finales protegidos.
+
+---
+
+## API Endpoints
+
+### Authentication
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/auth/login` | Generate JWT access token |
+
+---
+
+### Voters
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/voters/` | Register a new voter |
+| GET | `/voters/` | Get all voters with filtering and pagination |
+| GET | `/voters/{voter_id}` | Get voter by ID |
+| DELETE | `/voters/{voter_id}` | Delete voter |
+
+---
+
+### Candidates
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/candidates/` | Register a new candidate |
+| GET | `/candidates/` | Get all candidates with filtering and pagination |
+| GET | `/candidates/{candidate_id}` | Get candidate by ID |
+| DELETE | `/candidates/{candidate_id}` | Delete candidate |
+
+---
+
+### Votes
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/votes/` | Cast a vote |
+| GET | `/votes/` | Get all votes |
+| GET | `/votes/statistics` | Get voting statistics |
+
+---
+
+## Filtrado y paginación
+
+Los puntos de acceso a las listas de votantes y candidatos admiten filtrado y paginación mediante parámetros de consulta.
+
+---
+
+### Voters Filtering and Pagination
+
+Endpoint:
+
+```http
+GET /voters/
+```
+
+Parámetros de consulta disponibles:
+
+| Parameter | Type | Description |
+|---|---|---|
+| skip | integer | Number of records to skip |
+| limit | integer | Maximum number of records to return |
+| name | string | Filter voters by name |
+| email | string | Filter voters by email |
+| has_voted | boolean | Filter voters by voting status |
+
+Examples:
 
 Usa ese token en el header `Authorization: Bearer <token>` para los demás endpoints.
 

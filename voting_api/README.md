@@ -11,35 +11,97 @@ Permite registrar votantes y candidatos, emitir votos, validar que cada votante 
 - PostgreSQL
 - SQLAlchemy (ORM)
 - Pydantic (validación de datos)
-- JWT (python-jose) para autenticación
+- JWT para autenticación
 - Uvicorn (servidor)
 - Swagger / OpenAPI (documentación automática)
 
 ## Estructura del proyecto
 
 ```
+text
 voting_api/
+│
 ├── app/
-│   ├── main.py              # Punto de entrada de la app
-│   ├── database.py          # Conexión a PostgreSQL
-│   ├── core/
-│   │   └── security.py      # Creación y validación de JWT
 │   ├── auth/
-│   │   └── router.py        # Endpoint de login
-│   ├── voters/               # Modelo, schema, servicio y endpoints de votantes
-│   ├── candidates/           # Modelo, schema, servicio y endpoints de candidatos
-│   └── votes/                # Modelo, schema, servicio y endpoints de votos
-├── requirements.txt
-├── .env.example
-└── README.md
+│   │   ├── __init__.py
+│   │   ├── router.py
+│   │   └── service.py
+│   │
+│   ├── candidates/
+│   │   ├── __init__.py
+│   │   ├── model.py
+│   │   ├── router.py
+│   │   ├── schema.py
+│   │   └── service.py
+│   │
+│   ├── core/
+│   │   ├── __init__.py
+│   │   └── security.py
+│   │
+│   ├── voters/
+│   │   ├── __init__.py
+│   │   ├── model.py
+│   │   ├── router.py
+│   │   ├── schema.py
+│   │   └── service.py
+│   │
+│   ├── votes/
+│   │   ├── __init__.py
+│   │   ├── model.py
+│   │   ├── router.py
+│   │   ├── schema.py
+│   │   └── service.py
+│   │
+│   ├── __init__.py
+│   ├── database.py
+│   └── main.py
+│
+├── venv/
+├── .env
+├── .gitignore
+├── README.md
+└── requirements.txt
 ```
+## Database Script
 
+```sql
+CREATE TABLE voters (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    has_voted BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE candidates (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    party VARCHAR(100),
+    votes INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE votes (
+    id SERIAL PRIMARY KEY,
+    voter_id INTEGER NOT NULL UNIQUE,
+    candidate_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_vote_voter
+        FOREIGN KEY (voter_id)
+        REFERENCES voters(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_vote_candidate
+        FOREIGN KEY (candidate_id)
+        REFERENCES candidates(id)
+        ON DELETE CASCADE
+);
+```
 ## Instalación y ejecución local
 
 1. Clonar el repositorio y entrar a la carpeta:
    ```bash
-   git clone <url-del-repo>
-   cd voting_api
+   git clone https://github.com/YOUR_USERNAME/voting-api.git
+   cd voting-api
    ```
 
 2. Crear y activar un entorno virtual:
